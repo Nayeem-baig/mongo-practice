@@ -8,11 +8,14 @@ app.use(express.json())
 const con = mongoose.connection
 
 con.on('open', () =>{
-    console.log("server online...")
+    console.log("Server online...")
 })
 
 const userRouter = require('./routes/users')
 app.use('/users', userRouter)
+
+const productRouter = require('./routes/product')
+app.use('/product', productRouter)
 
 app.listen(4000 ,() => {
     console.log("Server listening on port 4000")

@@ -1,0 +1,7 @@
+Register
+Login
+Forgot password
+list all users
+list user by ID
+Block /unblock user
+Delete user

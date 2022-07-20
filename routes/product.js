@@ -39,7 +39,8 @@ router.patch("/update", async (req, res) => {
   const name = req.body.name;
   const description = req.body.description;
   const price = req.body.price;
-  const veg_nonveg = req.body.veg_nonveg;
+  const veg = req.body.veg;
+  const category = req.body.category;
 
   if(product != null){
     if (name != null){
@@ -51,8 +52,11 @@ router.patch("/update", async (req, res) => {
     if (price != null){
       product.price = price;
     }
-    if (veg_nonveg != null){
-      product.veg_nonveg = veg_nonveg;
+    if (veg != null){
+      product.veg = veg;
+    }
+  if (category != null){
+      product.category = category;
     }
   } else {
     res.status(404).send("Product not found");
@@ -67,10 +71,10 @@ router.patch("/update", async (req, res) => {
 router.delete("/delete", async (req, res) => {
   const product = await Product.findById(req.body.id);
   if (product != null) {
-    const u1 = await product.remove();
+    const p1 = await product.remove();
     res.status(200).send("Product deleted");
   } else {
-    res.status(400).send("Product does not exist");
+    // res.status(400).send("Product does not exist");
   }
 });
 
@@ -99,6 +103,19 @@ router.get("/:category", async (req, res) => {
     }
   const product = await Product.find({category:req.params.category});
   res.send(product);
+});
+
+// update categories names
+router.patch("/:category/update_category", async (req, res) => {
+  const product = await Product.find({category:req.params.category});
+  const category = req.body.category;
+  if(req.body.category != null){
+    product.category = category;
+    const p1 = await product.save();
+    res.send(product);
+    return;
+  }
+    res.send("Nothing to update")
 });
 
 module.exports = router;

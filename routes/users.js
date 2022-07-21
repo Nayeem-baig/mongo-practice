@@ -4,6 +4,23 @@ const jwt = require("jsonwebtoken");
 const Users = require("../models/usersModel");
 const router = express.Router();
 
+const { v4: uuidv4 } = require('uuid');
+const { mongo } = require("mongoose");
+
+// function to test token
+function authenticateToken(req ,res ,next){
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+ if(token == null) return res.sendStatus(401)
+
+ jwt.verify(token , "secretkey" , (err ,claims) =>{
+  if (err) return res.sendStatus(403)
+  req.claims = claims
+  console.log(claims)
+  next()
+ })
+}
+
 // const createToken = async(req ,res) =>{
 //   const token = await jwt.sign({_id:"123456789009876543azxcvbnhh"},"thisisasecretkeygenerated");
 //   console.log(token);
@@ -16,9 +33,10 @@ router.get("/listAllUsers",async (req, res) => {
   const user = await Users.find();
   res.json(user);
 });
+
 // Listing single user details using the unique id of the user - profile
-router.get("/:id", async (req, res) => {
-  const users = await Users.findById(req.params.id);
+router.get("/profile", authenticateToken,async (req, res) => {
+  const users = await Users.findById(req.claims.userid);
   if (users == null) {
     res.status(400).send("Users does not exist");
   } else {
@@ -27,8 +45,8 @@ router.get("/:id", async (req, res) => {
 });
 
 // update profile api
-router.patch("/:id/profileupdate", async (req, res) => {
-  const user = await Users.findById(req.params.id);
+router.patch("/profile/profileupdate", async (req, res) => {
+  const user = await Users.findById(req.claims.userid);
 
   if (user != null) {
     const name = req.body.name;
@@ -72,24 +90,14 @@ router.post("/register", async (req, res) => {
     res.status(400).send("Minimum password length is 6 chars");
     return;
   }
-  // generating token before registering
-  // function generateToken(){
-  // try{
-  //         const token = jwt.sign({_id:this._id}, "thisisasecretkeyforjsonwebtoeknsokay");
-  //         console.log(token);
-  //         return token;
-  // }catch(error){
-  //     res.send("Error" + error);
-  //     console.log("Error" + error);
-  // }
-  // }
-  // const token = await users.generateToken();
+
   const u1 = await users.save();
   res.status(200).send("User added");
 });
 
 // login api
-router.post("/login", async (req, res) => {
+router.post("/login",async (req, res) => {
+
   const users = await Users.find();
   const userData = users.filter((x) => x.email == req.body.email);
   let user = userData[0];
@@ -109,9 +117,10 @@ router.post("/login", async (req, res) => {
     res.status(400).send("Your account has been blocked");
     return;
   }
+   const jti = uuidv4();
   const options = {
-    issuer: "nodeServer"
-
+    issuer: "nodeServer",
+    jwtid : jti
   };
 
   const token = jwt.sign(
@@ -123,6 +132,7 @@ router.post("/login", async (req, res) => {
   // users.save();
   res.send(token);
 });
+
 
 // forgot password api
 router.post("/forgotpassword", async (req, res) => {
@@ -145,8 +155,13 @@ router.post("/forgotpassword", async (req, res) => {
 });
 
 // This endpoint takes a id of a user and blocks and unblocks it
-router.patch("/blockUser", async (req, res) => {
+router.patch("/blockUser", authenticateToken ,async (req, res) => {
+  const claims = req.claims;
   const users = await Users.findById(req.body.id);
+  if(claims.role != "admin"){
+    res.status(404).send("You are not allowed to view this site");
+    return;
+  }
   if (users == null) {
     res.send("User does not exist");
     return;
@@ -161,14 +176,19 @@ router.patch("/blockUser", async (req, res) => {
   const u1 = await users.save();
 });
 // this api is used to delete an user using its id
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", authenticateToken,async (req, res) => {
+  const claims = req.claims;
   const users = await Users.findById(req.params.id);
-  if (users == null) {
-    res.status(400).send("Users does not exist");
-  } else {
-    const u1 = await users.remove();
+  if (users != null) {
+    if(claims.role == 'admin'){
+      const u1 = await users.remove();
     res.status(200).send("User deleted");
-  }
+    return
+    }
+    res.status(400).send("You cannot view this site");
+      return;
+  }  
+  res.status(400).send("Users does not exist");
 });
 
 module.exports = router;

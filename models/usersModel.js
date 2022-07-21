@@ -26,16 +26,8 @@ const usersSchema = new mongoose.Schema({
         type: String,
         required :true,
         default :"consumer"
-    },
-    tokens:[{
-        token:{
-        type: String,
-        required :true
-        }
-    }]
+    }
 })
-
-
 
 
 // usersSchema.pre('save',async function (next) {
@@ -44,7 +36,6 @@ const usersSchema = new mongoose.Schema({
 // this.password = hashed;
 // next()
 // })
-
 // usersSchema.methods.isValidPassword = async function (password){
 //     return await bcrypt.compare (password, this.password)
 // }

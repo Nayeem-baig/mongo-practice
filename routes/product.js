@@ -27,7 +27,6 @@ router.post("/add", async (req, res) => {
       // Some other error
       return res.status(422).send("err");
     }
-
     res.send("Product added")
   });
 });

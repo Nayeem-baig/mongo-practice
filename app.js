@@ -16,6 +16,8 @@ app.use('/users', userRouter)
 
 const productRouter = require('./routes/product')
 app.use('/product', productRouter)
+const categoryRouter = require('./routes/category')
+app.use('/category', categoryRouter)
 
 app.listen(4000 ,() => {
     console.log("Server listening on port 4000")

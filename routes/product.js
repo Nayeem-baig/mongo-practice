@@ -1,9 +1,29 @@
 const express = require("express");
 const Product = require("../models/productModel");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
+
+// function to test token
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, "secretkey", (err, claims) => {
+    if (err) return res.sendStatus(403);
+    req.claims = claims;
+    next();
+  });
+}
 
 // Add product api
-router.post("/add", async (req, res) => {
+router.post("/add",authenticateToken, async (req, res) => {
+
+  const role = req.claims.role;
+  if (role != "admin") {
+    res.status(400).send("unauthorized");
+    return;
+  }
   const product = new Product({
     name: req.body.name,
     description: req.body.description,
@@ -12,12 +32,6 @@ router.post("/add", async (req, res) => {
     category: req.body.category,
     recommended:req.body.recommended
   });
-  // try{
-  //   const u1 = await product.save();
-  //   res.status(200).send("Product added");
-  // }catch(err){
-  //   res.send("Error product name already exists")
-  //}
   product.save(function(err) {
     if (err) {
       if (err.name === 'MongoError' || err.code === 11000) {
@@ -33,7 +47,12 @@ router.post("/add", async (req, res) => {
 
 // Update product api
 
-router.patch("/update", async (req, res) => {
+router.patch("/update",authenticateToken, async (req, res) => {
+  const role = req.claims.role;
+  if (role != "admin") {
+    res.status(400).send("unauthorized");
+    return;
+  }
   const product = await Product.findById(req.body.id);
   const name = req.body.name;
   const description = req.body.description;
@@ -67,13 +86,18 @@ router.patch("/update", async (req, res) => {
 
 //remove product api
 
-router.delete("/delete", async (req, res) => {
+router.delete("/delete",authenticateToken, async (req, res) => {
+  const role = req.claims.role;
+  if (role != "admin") {
+    res.status(400).send("unauthorized");
+    return;
+  }
   const product = await Product.findById(req.body.id);
   if (product != null) {
     const p1 = await product.remove();
     res.status(200).send("Product deleted");
   } else {
-    // res.status(400).send("Product does not exist");
+    res.status(400).send("Product does not exist");
   }
 });
 
@@ -102,19 +126,6 @@ router.get("/:category", async (req, res) => {
     }
   const product = await Product.find({category:req.params.category});
   res.send(product);
-});
-
-// update categories names
-router.patch("/:category/update_category", async (req, res) => {
-  const product = await Product.find({category:req.params.category});
-  const category = req.body.category;
-  if(req.body.category != null){
-    product.category = category;
-    const p1 = await product.save();
-    res.send(product);
-    return;
-  }
-    res.send("Nothing to update")
 });
 
 module.exports = router;

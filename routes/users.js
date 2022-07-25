@@ -3,6 +3,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const Users = require("../models/usersModel");
 const router = express.Router();
+const Product = require("../models/productModel");
 
 const { v4: uuidv4 } = require("uuid");
 const { mongo } = require("mongoose");
@@ -146,7 +147,66 @@ router.post("/forgotpassword", async (req, res) => {
   }
 });
 
+// api for adding items in favourites list
+
+router.post("/add_favourites", authenticateToken, async (req, res) => {
+  const users = await Users.findById(req.claims.userid);
+  const item = req.body.id;
+  const itemIndb = await Product.findById(req.body.id);
+  if (users == null) {
+    res.status(404).send("User not found");
+    return;
+  }
+  if (itemIndb == null) {
+    res.status(404).send("Item not found");
+    return;
+  }
+  const userFavs = users.favourites;
+  const ispresent = userFavs.includes(item);
+
+  if (ispresent) {
+    res.status(400).send("Item already in fav list");
+    return;
+  }
+  users.favourites.push(item);
+  users.save();
+  res.status(200).send(itemIndb.name + " Added to favourites");
+});
+
+// api to remove fav
+
+router.delete("/del_favourites", authenticateToken, async(req,res) =>{
+  const users = await Users.findById(req.claims.userid);
+  const item = req.body.id;
+  try{
+    console.log(users.favourites);
+    users.save();
+    res.send("item removed");
+    return;
+  }catch(err){
+    res.status(400).send(err + "Cannot find item"); 
+  }
+})
+
+// Display all favourites of the user
+
+// router.get("/display_favourites", authenticateToken, async (req, res) => {
+//   const users = await Users.findById(req.claims.userid);
+//   const favs = users.favourites;
+//   var itemArr = [];
+
+//   favs.forEach(myfunction);
+
+//   function myfunction(){
+//     const itemsData = await Product.findById(favs[i]);
+//     var itemArr = [];
+//     itemArr.push(itemsData);
+//   }
+//     res.send(itemArr);
+// });
+
 // This endpoint takes a id of a user and blocks and unblocks it
+
 router.patch("/blockUser", authenticateToken, async (req, res) => {
   const claims = req.claims;
   const users = await Users.findById(req.body.id);

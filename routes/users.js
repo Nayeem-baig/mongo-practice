@@ -175,35 +175,38 @@ router.post("/add_favourites", authenticateToken, async (req, res) => {
 
 // api to remove fav
 
-router.delete("/del_favourites", authenticateToken, async(req,res) =>{
-  const users = await Users.findById(req.claims.userid);
-  const item = req.body.id;
-  try{
-    console.log(users.favourites);
-    users.save();
-    res.send("item removed");
+router.delete("/del_favourites", authenticateToken, async (req, res) => {
+  const user = await Users.findById(req.claims.userid);
+  const itemID = req.body.id;
+  if (itemID == null){
+    res.status(400).send("Please send item id");
     return;
-  }catch(err){
-    res.status(400).send(err + "Cannot find item"); 
   }
-})
+  let isPresent = user.favourites.filter((item) => item == itemID);
+  console.log(isPresent);
+  if(isPresent[0] == null){
+    res.status(404).send("Item Not found in favourites");
+    return;
+  }
+  let filteredData = user.favourites.filter((item) => item != itemID);
+  user.favourites = filteredData;
+  user.save();
+  res.send("item removed from favourites");
+});
 
 // Display all favourites of the user
 
-// router.get("/display_favourites", authenticateToken, async (req, res) => {
-//   const users = await Users.findById(req.claims.userid);
-//   const favs = users.favourites;
-//   var itemArr = [];
+router.get("/display_favourites", authenticateToken, async (req, res) => {
+  const users = await Users.findById(req.claims.userid);
 
-//   favs.forEach(myfunction);
-
-//   function myfunction(){
-//     const itemsData = await Product.findById(favs[i]);
-//     var itemArr = [];
-//     itemArr.push(itemsData);
-//   }
-//     res.send(itemArr);
-// });
+  let favs = users.favourites;
+  let fav = [];
+  for (i = 0; i < favs.length; i++) {
+    let item = await Product.findById(favs[i]);
+    fav.push(item);
+  }
+  res.send(fav);
+});
 
 // This endpoint takes a id of a user and blocks and unblocks it
 

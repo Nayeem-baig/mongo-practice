@@ -3,6 +3,9 @@ const { default: mongoose } = require('mongoose')
 const url = 'mongodb://localhost/serverOne'
 const app = express()
 
+var cors = require("cors");
+app.use(cors());
+
 mongoose.connect(url)
 app.use(express.json())
 const con = mongoose.connection

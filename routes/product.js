@@ -18,9 +18,8 @@ function authenticateToken(req, res, next) {
 
 // Add product api
 router.post("/add",authenticateToken, async (req, res) => {
-
-  const role = req.claims.role;
-  if (role != "admin") {
+  const rle = req.claims.rle;
+  if (rle != "admin") {
     res.status(400).send("unauthorized");
     return;
   }
@@ -48,8 +47,8 @@ router.post("/add",authenticateToken, async (req, res) => {
 // Update product api
 
 router.patch("/update",authenticateToken, async (req, res) => {
-  const role = req.claims.role;
-  if (role != "admin") {
+  const rle = req.claims.rle;
+  if (rle != "admin") {
     res.status(400).send("unauthorized");
     return;
   }
@@ -87,8 +86,8 @@ router.patch("/update",authenticateToken, async (req, res) => {
 //remove product api
 
 router.delete("/delete",authenticateToken, async (req, res) => {
-  const role = req.claims.role;
-  if (role != "admin") {
+  const rle = req.claims.rle;
+  if (rle != "admin") {
     res.status(400).send("unauthorized");
     return;
   }
@@ -103,29 +102,62 @@ router.delete("/delete",authenticateToken, async (req, res) => {
 
 // Non veg items list view
 
-router.get("/nonveg", async (req, res) => {
+router.get("/nonveg",authenticateToken, async (req, res) => {
+  const claims = req.claims;
+  if ( claims == "null" ){
+    res.status(400).send("Please login first")
+    return
+  }
   const product = await Product.find({ veg: false });
   res.send(product);
 });
 
 // veg items list view
-router.get("/veg", async (req, res) => {
+router.get("/veg",authenticateToken, async (req, res) => {
+  const claims = req.claims;
+  if ( claims == "null" ){
+    res.status(400).send("Please login first")
+    return
+  }
   const product = await Product.find({ veg: true });
   res.send(product);
 });
 
 // categorized items list viewing
-router.get("/:category", async (req, res) => {
-  if(req.params.category == "all"){
-    const product = await Product.find();
-    res.send(product);
-  }else if(req.params.category == "recommended"){
-    const product = await Product.find({ recommended: true });
+router.get("/:category",authenticateToken, async (req, res) => {
+  const claims = req.claims;
+  if ( claims == "null" ){
+    res.status(400).send("Please login first")
+    return
+  }
+  const reqcategory = req.params.category;
+  if(req.params.category == reqcategory){
+    const product = await Product.find({ reqcategory: true });
     res.send(product);
       return;
     }
-  const product = await Product.find({category:req.params.category});
-  res.send(product);
 });
+
+router.get("/recommended",authenticateToken, async (req, res) => {
+  const claims = req.claims;
+  if ( claims == "null" ){
+    res.status(400).send("Please login first")
+    return
+  }
+    const product = await Product.find({recommended: true });
+    res.send(product);
+      return;
+    
+});
+
+router.get("/all",authenticateToken, async (req, res) => {
+  const claims = req.claims;
+  if ( claims == " " ){
+    res.status(400).send("Please login first")
+    return
+  }
+  const product = await Product.find();
+  res.send(product);
+})
 
 module.exports = router;

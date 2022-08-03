@@ -37,8 +37,8 @@ router.post("/add_category", async (req,res) =>{
 
   // delete a category
   router.delete("/delete",authenticateToken, async (req, res) => {
-    const role = req.claims.role;
-    if (role != "admin") {
+    const rle = req.claims.rle;
+    if (rle != "admin") {
       res.status(400).send("unauthorized");
       return;
     }
@@ -53,8 +53,8 @@ router.post("/add_category", async (req,res) =>{
 
   // list all categories
   router.get("/list",authenticateToken, async (req, res) => {
-    const role = req.claims.role;
-    if (role != "admin") {
+    const rle = req.claims.rle;
+    if (rle != "admin") {
       res.status(400).send("unauthorized");
       return;
     }
@@ -64,8 +64,8 @@ router.post("/add_category", async (req,res) =>{
   
   // update categories names
   router.patch("/update",authenticateToken, async (req, res) => {
-    const role = req.claims.role;
-    if (role != "admin") {
+    const rle = req.claims.rle;
+    if (rle != "admin") {
       res.status(400).send("unauthorized");
       return;
     }

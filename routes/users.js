@@ -1,4 +1,3 @@
-require("dotenv").config();
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const Users = require("../models/usersModel");
@@ -13,7 +12,7 @@ function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) return res.sendStatus(401);
-
+ 
   jwt.verify(token, "secretkey", (err, claims) => {
     if (err) return res.sendStatus(403);
     req.claims = claims;
@@ -21,19 +20,10 @@ function authenticateToken(req, res, next) {
   });
 }
 
-router.get("/listAllUsers", authenticateToken, async (req, res) => {
-  const role = req.claims.role;
-  if (role != "admin") {
-    res.status(400).send("unauthorized");
-    return;
-  }
-  const user = await Users.find();
-  res.json(user);
-});
 
 // Listing single user details using the unique id int the token of the user - profile
 router.get("/profile", authenticateToken, async (req, res) => {
-  const users = await Users.findById(req.claims.userid);
+  const users = await Users.findById(req.claims.uid);
   if (users == null) {
     res.status(400).send("Users does not exist");
   } else {
@@ -43,7 +33,7 @@ router.get("/profile", authenticateToken, async (req, res) => {
 
 // update profile api
 router.patch("/profile/profileupdate", authenticateToken, async (req, res) => {
-  const user = await Users.findById(req.claims.userid);
+  const user = await Users.findById(req.claims.uid);
 
   if (user != null) {
     const name = req.body.name;
@@ -69,7 +59,6 @@ router.patch("/profile/profileupdate", authenticateToken, async (req, res) => {
 // Regestering user
 
 router.post("/register", async (req, res) => {
-  console.log(req.body)
   const users = new Users({
     name: req.body.name,
     username: req.body.username,
@@ -118,11 +107,12 @@ router.post("/login", async (req, res) => {
   const jti = uuidv4();
   const options = {
     issuer: "nodeServer",
+    expiresIn: '24h',
     jwtid: jti,
   };
 
   const token = jwt.sign(
-    { userid: user.id, role: user.role },
+    { uid: user._id, rle: user.role },
     "secretkey",
     options
   );
@@ -152,7 +142,7 @@ router.post("/forgotpassword", async (req, res) => {
 // api for adding items in favourites list
 
 router.post("/add_favourites", authenticateToken, async (req, res) => {
-  const users = await Users.findById(req.claims.userid);
+  const users = await Users.findById(req.claims.uid);
   const item = req.body.id;
   const itemIndb = await Product.findById(req.body.id);
   if (users == null) {
@@ -178,14 +168,13 @@ router.post("/add_favourites", authenticateToken, async (req, res) => {
 // api to remove fav
 
 router.delete("/del_favourites", authenticateToken, async (req, res) => {
-  const user = await Users.findById(req.claims.userid);
+  const user = await Users.findById(req.claims.uid);
   const itemID = req.body.id;
   if (itemID == null){
     res.status(400).send("Please send item id");
     return;
   }
   let isPresent = user.favourites.filter((item) => item == itemID);
-  console.log(isPresent);
   if(isPresent[0] == null){
     res.status(404).send("Item Not found in favourites");
     return;
@@ -196,15 +185,16 @@ router.delete("/del_favourites", authenticateToken, async (req, res) => {
   res.send("item removed from favourites");
 });
 
+
 // Display all favourites of the user
 
 router.get("/display_favourites", authenticateToken, async (req, res) => {
-  const users = await Users.findById(req.claims.userid);
-
-  let favs = users.favourites;
+  const users = await Users.findById(req.claims.uid);
   let fav = [];
-  for (i = 0; i < favs.length; i++) {
-    let item = await Product.findById(favs[i]);
+  let favArr = users.favourites;
+  for (i = 0; i < favArr.length; i++) {
+    const id = favArr[i]
+    let item = await Product.findById(id);
     fav.push(item);
   }
   res.send(fav);
@@ -232,6 +222,18 @@ router.patch("/blockUser", authenticateToken, async (req, res) => {
   }
   const u1 = await users.save();
 });
+
+router.get("/listAllUsers", authenticateToken, async (req, res) => {
+  const role = req.claims.role;
+  if (role != "admin") {
+    res.status(400).send("unauthorized");
+    return;
+  }
+  const user = await Users.find();
+  res.json(user);
+});
+
+
 // this api is used to delete an user using its id
 router.delete("/delete/:id", authenticateToken, async (req, res) => {
   const claims = req.claims;

@@ -147,7 +147,6 @@ router.get("/recommended",authenticateToken, async (req, res) => {
     const product = await Product.find({recommended: true });
     res.send(product);
       return;
-    
 });
 
 router.get("/all",authenticateToken, async (req, res) => {

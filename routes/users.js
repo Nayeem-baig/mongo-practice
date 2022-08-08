@@ -157,7 +157,7 @@ router.post("/add_favourites", authenticateToken, async (req, res) => {
   const ispresent = userFavs.includes(item);
 
   if (ispresent) {
-    res.status(400).send("Item already in fav list");
+    res.status(409).send("Item already in fav list");
     return;
   }
   users.favourites.push(item);
@@ -184,7 +184,7 @@ router.delete("/del_favourites", authenticateToken, async (req, res) => {
   user.save();
   res.send("item removed from favourites");
 });
-
+//Checkout with added products in cart
 
 // Display all favourites of the user
 

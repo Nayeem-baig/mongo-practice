@@ -25,7 +25,10 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         required:false,
         trim:true,
-    } 
+    },img:{
+        type: String,
+        required:true,
+    }
 })
 
 module.exports = mongoose.model('Product' , productSchema)

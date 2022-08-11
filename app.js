@@ -1,27 +1,31 @@
-const express = require('express')
-const { default: mongoose } = require('mongoose')
-const url = 'mongodb://localhost/serverOne'
-const app = express()
+const express = require("express");
+const { default: mongoose } = require("mongoose");
+const url = "mongodb://localhost/serverOne";
+const app = express();
 
 var cors = require("cors");
 app.use(cors());
 
-mongoose.connect(url)
-app.use(express.json())
-const con = mongoose.connection
+mongoose.connect(url);
+app.use(express.json());
+const con = mongoose.connection;
 
-con.on('open', () =>{
-    console.log("Server online...")
-})
-    
-const userRouter = require('./routes/users')
-app.use('/users', userRouter)
+con.on("open", () => {
+  console.log("Server online...");
+});
 
-const productRouter = require('./routes/product')
-app.use('/product', productRouter)
-const categoryRouter = require('./routes/category')
-app.use('/category', categoryRouter)
+const userRouter = require("./routes/users");
+app.use("/users", userRouter);
 
-app.listen(4000 ,() => {
-    console.log("Server listening on port 4000")
-})
+const productRouter = require("./routes/product");
+app.use("/product", productRouter);
+
+const categoryRouter = require("./routes/category");
+app.use("/category", categoryRouter);
+
+const ordersRouter = require("./routes/orders");
+app.use("/orders", ordersRouter);
+
+app.listen(4000, () => {
+  console.log("Server listening on port 4000");
+});

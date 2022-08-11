@@ -29,7 +29,8 @@ router.post("/add",authenticateToken, async (req, res) => {
     price: req.body.price,
     veg: req.body.veg,
     category: req.body.category,
-    recommended:req.body.recommended
+    recommended:req.body.recommended,
+    img:req.body.img
   });
   product.save(function(err) {
     if (err) {
@@ -58,6 +59,7 @@ router.patch("/update",authenticateToken, async (req, res) => {
   const price = req.body.price;
   const veg = req.body.veg;
   const category = req.body.category;
+  const img = req.body.img;
 
   if(product != null){
     if (name != null){
@@ -74,6 +76,9 @@ router.patch("/update",authenticateToken, async (req, res) => {
     }
   if (category != null){
       product.category = category;
+    }
+    if (img != null){
+      product.img = img;
     }
   } else {
     res.status(404).send("Product not found");

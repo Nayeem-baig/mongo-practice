@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const Users = require("../models/usersModel");
 const router = express.Router();
 const Product = require("../models/productModel");
-
 const { v4: uuidv4 } = require("uuid");
 const { mongo } = require("mongoose");
 
@@ -184,7 +183,6 @@ router.delete("/del_favourites", authenticateToken, async (req, res) => {
   user.save();
   res.send("item removed from favourites");
 });
-//Checkout with added products in cart
 
 // Display all favourites of the user
 

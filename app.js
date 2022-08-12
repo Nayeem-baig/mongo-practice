@@ -1,10 +1,23 @@
 const express = require("express");
 const { default: mongoose } = require("mongoose");
 const url = "mongodb://localhost/serverOne";
+// const DB = 'mongodb+srv://nayeembaig:nayeembaig@cluster0.qu8jyfp.mongodb.net/Cafeteria?retryWrites=true&w=majority'
+
+
+
 const app = express();
 
 var cors = require("cors");
 app.use(cors());
+
+// mongoose.connect(DB,{
+//   useNewUrlParser: true,
+//   // useCreateIndex: true,
+//   useUnifiedTopology:true,
+//   // useFindAndModify:false
+// }).then(() =>{
+//   console.log("Connected")
+// }).catch((err) => console.log(err ,"not connected"));
 
 mongoose.connect(url);
 app.use(express.json());

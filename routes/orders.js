@@ -24,7 +24,8 @@ router.post("/",authenticateToken, async (req, res) => {
     orderedBy : req.claims.uid,
   }
   );
-  const order = await orders.save();
+  console.log(orders)
+  await orders.save();
   res.send("Order succesuful")
 });
 

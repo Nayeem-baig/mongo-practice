@@ -230,7 +230,9 @@ router.get("/listAllUsers", authenticateToken, async (req, res) => {
   const user = await Users.find();
   res.json(user);
 });
-
+router.get('/hi' , async (req,res) =>{
+  res.send("Hello mother fucker! you did it")
+})
 
 // this api is used to delete an user using its id
 router.delete("/delete/:id", authenticateToken, async (req, res) => {

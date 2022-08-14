@@ -19,7 +19,8 @@ function authenticateToken(req, res, next) {
 // add a category
 router.post("/add_category", async (req,res) =>{
     const category = new Category({
-        name: req.body.category
+        name: req.body.category,
+        img: req.body.img
     }
     );
     category.save(function(err) {
@@ -53,11 +54,6 @@ router.post("/add_category", async (req,res) =>{
 
   // list all categories
   router.get("/list",authenticateToken, async (req, res) => {
-    const rle = req.claims.rle;
-    if (rle != "admin") {
-      res.status(400).send("unauthorized");
-      return;
-    }
     const category = await Category.find();
     res.json(category);
   });

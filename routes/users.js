@@ -58,6 +58,7 @@ router.patch("/profile/profileupdate", authenticateToken, async (req, res) => {
 // Regestering user
 
 router.post("/register", async (req, res) => {
+  console.log(req.body)
   const users = new Users({
     name: req.body.name,
     username: req.body.username,

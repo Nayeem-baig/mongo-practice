@@ -40,7 +40,8 @@ router.post("/add",authenticateToken, async (req, res) => {
       }
       // Some other error
       return res.status(422).send("err");
-    }
+    } else
+    product.save();
     res.send("Product added")
   });
 });
@@ -134,10 +135,22 @@ router.get("/:category",authenticateToken, async (req, res) => {
   if ( claims == "null" ){
     res.status(400).send("Please login first")
     return
-  }
+  } 
   const reqcategory = req.params.category;
+  if(reqcategory === "all"){
+    const product = await Product.find();
+    res.send(product);
+    return;
+  } 
+  if(reqcategory === "recommended"){
+    const product = await Product.find({recommended: true });
+    res.send(product);
+    return;
+  }
+  console.log(req.params.category)
+
   if(req.params.category == reqcategory){
-    const product = await Product.find({ reqcategory: true });
+    const product = await Product.find({ category: reqcategory });
     res.send(product);
       return;
     }

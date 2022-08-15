@@ -29,4 +29,19 @@ router.post("/",authenticateToken, async (req, res) => {
   res.send("Order succesuful")
 });
 
+router.get("/orderhistory",authenticateToken ,async (req , res) => {
+  const orders = await Orders.find();
+  const uid = req.claims.uid;
+console.log(orders)
+  // let order = [];
+  // let orderArr = orders;
+  // for (i = 0; i < orderArr.length; i++) {
+  //   const id = favArr[i]
+  //   let item = await Orders.findById(uid);
+  //   order.push(item);
+  // }
+  const userOrders = orders.filter((product) => product.orderedBy == uid )
+  res.send(userOrders);
+})
+
 module.exports = router;

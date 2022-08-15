@@ -32,6 +32,21 @@ router.post("/add",authenticateToken, async (req, res) => {
     recommended:req.body.recommended,
     img:req.body.img
   });
+  if (req.body.name === ""){
+    return res.status(400).send("Enter name")
+  } else if (req.body.description === ""){
+    return res.status(400).send("Enter description")
+  }else if (req.body.price === ""){
+    return res.status(400).send("Enter price")
+  }else if (req.body.veg === ""){
+    return res.status(400).send("Enter veg or non veg")
+  }else if (req.body.category === ""){
+    return res.status(400).send("Enter category")
+  }else if (req.body.recommended === ""){
+    return res.status(400).send("Enter recommended")
+  }else if (req.body.img === ""){
+    return res.status(400).send("Enter image link")
+  }
   product.save(function(err) {
     if (err) {
       if (err.name === 'MongoError' || err.code === 11000) {

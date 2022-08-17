@@ -74,11 +74,6 @@ router.post("/register", async (req, res) => {
     res.status(400).send(req.body.email + " email already in use");
     return;
   }
-  if (req.body.password.length < 6) {
-    res.status(400).send("Minimum password length is 6 chars");
-    return;
-  }
-
   const u1 = await users.save();
   res.status(200).send("User added");
 });
@@ -97,7 +92,7 @@ router.post("/login", async (req, res) => {
     return;
   }
   if (user.password != req.body.password) {
-    res.status(404).send("Invalid pass");
+    res.status(404).send("Invalid pass! Try again.");
     return;
   }
   if (user.blockstatus) {

@@ -17,10 +17,11 @@ function authenticateToken(req, res, next) {
       next();
     });
   }
-
+// place order api
 router.post("/",authenticateToken, async (req, res) => {
   const orders = new Orders({
     items : req.body.order,
+    total: req.body.total,
     orderedBy : req.claims.uid,
   }
   );
@@ -28,20 +29,22 @@ router.post("/",authenticateToken, async (req, res) => {
   await orders.save();
   res.send("Order succesuful")
 });
-
+// order history by token user
 router.get("/orderhistory",authenticateToken ,async (req , res) => {
   const orders = await Orders.find();
   const uid = req.claims.uid;
-console.log(orders)
-  // let order = [];
-  // let orderArr = orders;
-  // for (i = 0; i < orderArr.length; i++) {
-  //   const id = favArr[i]
-  //   let item = await Orders.findById(uid);
-  //   order.push(item);
-  // }
   const userOrders = orders.filter((product) => product.orderedBy == uid )
   res.send(userOrders);
+})
+
+router.get("/listallorder" ,authenticateToken, async (req , res)=>{
+  const claims = req.claims;
+  console.log(claims)
+  if(claims.rle !== "admin"){
+   return res.status(403).send("User not allowed");
+  }
+  const orders = await Orders.find();
+  res.send(orders);
 })
 
 module.exports = router;

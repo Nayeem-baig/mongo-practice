@@ -17,12 +17,24 @@ function authenticateToken(req, res, next) {
 }
 
 // add a category
-router.post("/add_category", async (req,res) =>{
+router.post("/add_category", authenticateToken, async (req,res) =>{
+  const rle = req.claims.rle;
+  console.log(req.claims)
+  console.log(req.body)
+  if (rle != "admin") {
+    res.status(400).send("unauthorized");
+    return;
+  }
     const category = new Category({
         name: req.body.category,
-        img: req.body.img
+        img: req.body.img,
     }
     );
+    if (req.body.name === "") {
+      return res.status(400).send("Enter name");
+    }else if (req.body.img === "") {
+      return res.status(400).send("Enter image link");
+    }
     category.save(function(err) {
         if (err) {
           if (err.name === 'MongoError' || err.code === 11000) {
@@ -31,7 +43,7 @@ router.post("/add_category", async (req,res) =>{
           }
           // Some other error
           return res.status(422).send("err");
-        }
+        }else category.save();
         res.send("Category added")
     });
   });

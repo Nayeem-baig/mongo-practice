@@ -3,6 +3,9 @@ const ordersSchema = new mongoose.Schema({
     items :{
         type: Array,
     },
+    total:{
+        type: Number,
+    },
     orderedBy:{
         type: String,
     }

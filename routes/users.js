@@ -30,35 +30,38 @@ router.get("/profile", authenticateToken, async (req, res) => {
   }
 });
 
-// update profile api
-router.patch("/profile/profileupdate", authenticateToken, async (req, res) => {
-  const user = await Users.findById(req.claims.uid);
+router.get("/getuser", async (req ,res) => {
+  const uid = (req.body.uid);
+  const users = await Users.find({_id : uid});
+  if (users != "null"){
+  return res.send(users)
+  }
+  res.send("Not found")
+})
 
+// update profile api
+router.patch("/profile/passwordupdate", authenticateToken, async (req, res) => {
+  const user = await Users.findById(req.claims.uid);
+  console.log(req.body)
   if (user != null) {
-    const name = req.body.name;
-    const username = req.body.username;
-    const phn = req.body.phn;
-    if (name != null) {
-      user.name = name;
+    const password = req.body.password;
+    if (password === user.password) {
+      return res.status(403).send("Old password and new password cannot be same!")
     }
-    if (username != null) {
-      user.username = username;
-    }
-    if (phn != null) {
-      user.phn = phn;
+    if (password != null) {
+      user.password = password;
     }
   } else {
     res.status(404).send("User not found");
     return;
   }
   const u1 = await user.save();
-  res.send(user + "user updated");
+  res.send("Password updated");
 });
 
 // Regestering user
 
 router.post("/register", async (req, res) => {
-  console.log(req.body)
   const users = new Users({
     name: req.body.name,
     username: req.body.username,
@@ -108,6 +111,43 @@ router.post("/login", async (req, res) => {
 
   const token = jwt.sign(
     { uid: user._id, rle: user.role },
+    "secretkey",
+    options
+  );
+  res.send(token);
+});
+
+//admin login api
+router.post("/adminlogin", async (req, res) => {
+  const users = await Users.find();
+  const userData = users.filter((x) => x.email == req.body.email);
+  let admin = userData[0];
+  console.log(admin)
+  if (userData.length == 0) {
+    res.status(400).send("Admin does not exist");
+    return;
+  }
+  if (admin.email != req.body.email) {
+    res.status(400).send("invaild email address");
+    return;
+  }
+  if (admin.password != req.body.password) {
+    res.status(404).send("Invalid pass! Try again.");
+    return;
+  }
+  if (admin.role != "admin") {
+    res.status(404).send("Admin not found!");
+    return;
+  }
+  const jti = uuidv4();
+  const options = {
+    issuer: "nodeServer",
+    expiresIn: '24h',
+    jwtid: jti,
+  };
+
+  const token = jwt.sign(
+    { uid: admin._id, rle: admin.role },
     "secretkey",
     options
   );
@@ -199,7 +239,7 @@ router.get("/display_favourites", authenticateToken, async (req, res) => {
 router.patch("/blockUser", authenticateToken, async (req, res) => {
   const claims = req.claims;
   const users = await Users.findById(req.body.id);
-  if (claims.role != "admin") {
+  if (claims.rle != "admin") {
     res.status(404).send("You are not allowed to view this site");
     return;
   }
@@ -218,24 +258,23 @@ router.patch("/blockUser", authenticateToken, async (req, res) => {
 });
 
 router.get("/listAllUsers", authenticateToken, async (req, res) => {
-  const role = req.claims.role;
-  if (role != "admin") {
+  const rle = req.claims.rle;
+  if (rle != "admin") {
     res.status(400).send("unauthorized");
     return;
   }
   const user = await Users.find();
   res.json(user);
 });
-router.get('/hi' , async (req,res) =>{
-  res.send("Hello mother fucker! you did it")
-})
+
 
 // this api is used to delete an user using its id
-router.delete("/delete/:id", authenticateToken, async (req, res) => {
+router.delete("/delete", authenticateToken, async (req, res) => {
   const claims = req.claims;
-  const users = await Users.findById(req.params.id);
+  const users = await Users.findById(req.body.id);
   if (users != null) {
-    if (claims.role == "admin") {
+
+    if (claims.rle == "admin") {
       const u1 = await users.remove();
       res.status(200).send("User deleted");
       return;

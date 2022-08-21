@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const Orders = require("../models/ordersModel");
+const Users = require("../models/usersModel");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
 const { mongo } = require("mongoose");
@@ -22,10 +23,9 @@ router.post("/",authenticateToken, async (req, res) => {
   const orders = new Orders({
     items : req.body.order,
     total: req.body.total,
-    orderedBy : req.claims.uid,
+    orderedBy : req.claims.name,
   }
   );
-  console.log(orders)
   await orders.save();
   res.send("Order succesuful")
 });

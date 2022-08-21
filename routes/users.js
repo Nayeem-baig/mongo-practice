@@ -110,7 +110,7 @@ router.post("/login", async (req, res) => {
   };
 
   const token = jwt.sign(
-    { uid: user._id, rle: user.role },
+    { uid: user._id, rle: user.role , name: user.name},
     "secretkey",
     options
   );
@@ -147,7 +147,7 @@ router.post("/adminlogin", async (req, res) => {
   };
 
   const token = jwt.sign(
-    { uid: admin._id, rle: admin.role },
+    { uid: admin._id, rle: admin.role},
     "secretkey",
     options
   );
@@ -263,7 +263,7 @@ router.get("/listAllUsers", authenticateToken, async (req, res) => {
     res.status(400).send("unauthorized");
     return;
   }
-  const user = await Users.find();
+  const user = await Users.find({role : "consumer"});
   res.json(user);
 });
 

@@ -23,7 +23,8 @@ router.post("/",authenticateToken, async (req, res) => {
   const orders = new Orders({
     items : req.body.order,
     total: req.body.total,
-    orderedBy : req.claims.name,
+    orderedBy : req.claims.uid,
+    customerName:req.claims.name,
   }
   );
   await orders.save();

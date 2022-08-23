@@ -8,6 +8,9 @@ const ordersSchema = new mongoose.Schema({
     },
     orderedBy:{
         type: String,
+    },
+    customerName:{
+        type: String,
     }
 },
 {

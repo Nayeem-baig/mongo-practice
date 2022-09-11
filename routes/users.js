@@ -74,7 +74,7 @@ router.post("/register", async (req, res) => {
   const userData = dbuser.filter((x) => x.email == req.body.email);
   let user = userData[0];
   if (user != null) {
-    res.status(400).send(req.body.email + " email already in use");
+    res.status(400).send("Email already in use");
     return;
   }
   const u1 = await users.save();

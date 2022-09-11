@@ -25,6 +25,7 @@ router.post("/",authenticateToken, async (req, res) => {
     total: req.body.total,
     orderedBy : req.claims.uid,
     customerName:req.claims.name,
+    table:req.body.table,
   }
   );
   await orders.save();

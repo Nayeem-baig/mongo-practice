@@ -11,7 +11,10 @@ const ordersSchema = new mongoose.Schema({
     },
     customerName:{
         type: String,
-    }
+    },
+    table:{
+        type: String,
+    },
 },
 {
     timestamps: true

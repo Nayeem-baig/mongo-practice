@@ -158,6 +158,7 @@ router.get("/:category", authenticateToken, async (req, res) => {
   const reqcategory = req.params.category;
   if (reqcategory === "all") {
     const product = await Product.find();
+    
     res.send(product);
     return;
   }
@@ -166,7 +167,6 @@ router.get("/:category", authenticateToken, async (req, res) => {
     res.send(product);
     return;
   }
-  console.log(req.params.category);
 
   if (req.params.category == reqcategory) {
     const product = await Product.find({ category: reqcategory });
@@ -186,7 +186,7 @@ router.get("/recommended", authenticateToken, async (req, res) => {
   return;
 });
 
-router.get("/all", authenticateToken, async (req, res) => {
+router.get("/all product", authenticateToken, async (req, res) => {
   const claims = req.claims;
   if (claims == " ") {
     res.status(400).send("Please login first");
